@@ -8,12 +8,12 @@ import java.text.DateFormat
 
 @Entity(tableName = "task_table")
 @Parcelize
-data class Task(
+data class Task @JvmOverloads constructor(
     val name : String,
-    val important : Boolean = false,
-    val completed : Boolean = false,
+    val isImportant : Boolean = false,
+    val isCompleted : Boolean = false,
     val created : Long = System.currentTimeMillis(),
-    @PrimaryKey(autoGenerate = true) val id : Int = 0
+    @PrimaryKey(autoGenerate = true) val taskId : Int = 0
 ) : Parcelable {
     val createdDateFormatted : String
         get() = DateFormat.getDateTimeInstance().format(created)

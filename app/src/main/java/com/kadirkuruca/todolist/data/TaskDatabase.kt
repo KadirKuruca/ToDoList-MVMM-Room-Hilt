@@ -26,7 +26,7 @@ abstract class TaskDatabase : RoomDatabase(){
 
             applicationScope.launch {
                 dao.insert(Task("Wash the dishes"))
-                dao.insert(Task("Kiss my lover", important = true))
+                dao.insert(Task("Kiss my lover", isImportant = true))
                 dao.insert(Task("Cook the dinner"))
                 dao.insert(Task("Study English"))
                 dao.insert(Task("Watch LOTR 2"))
