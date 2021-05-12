@@ -28,8 +28,10 @@ abstract class TaskDatabase : RoomDatabase(){
                 dao.insert(Task("Wash the dishes"))
                 dao.insert(Task("Kiss my lover", isImportant = true))
                 dao.insert(Task("Cook the dinner"))
-                dao.insert(Task("Study English"))
-                dao.insert(Task("Watch LOTR 2"))
+                dao.insert(Task("Study English", isImportant = true))
+                dao.insert(Task("Watch LOTR 1", isCompleted = true))
+                dao.insert(Task("Watch LOTR 2", isCompleted = true))
+                dao.insert(Task("Watch LOTR 3"))
             }
         }
     }
