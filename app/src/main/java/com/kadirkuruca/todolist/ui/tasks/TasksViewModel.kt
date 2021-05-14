@@ -1,9 +1,8 @@
 package com.kadirkuruca.todolist.ui.tasks
 
+import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.kadirkuruca.todolist.data.PreferencesManager
 import com.kadirkuruca.todolist.data.SortOrder
 import com.kadirkuruca.todolist.data.Task
@@ -17,9 +16,10 @@ import kotlinx.coroutines.launch
 
 class TasksViewModel @ViewModelInject constructor(
     private val taskDao: TaskDao,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    @Assisted private val state : SavedStateHandle
 ) : ViewModel() {
-    val searchQuery = MutableStateFlow("")
+    val searchQuery = state.getLiveData("searchQuery","") //Search query gets from SavedStateHandle
 
     val preferencesFlow = preferencesManager.preferencesFlow
 
@@ -27,7 +27,7 @@ class TasksViewModel @ViewModelInject constructor(
     val tasksEvent = tasksEventChannel.receiveAsFlow()
 
     private val tasksFlow = combine(
-        searchQuery,
+        searchQuery.asFlow(),
         preferencesFlow
     ) { searchQuery, filterPreferences ->
         Pair(searchQuery, filterPreferences)
@@ -46,7 +46,9 @@ class TasksViewModel @ViewModelInject constructor(
     }
 
     fun onTaskSelected(task: Task) {
-
+        viewModelScope.launch {
+            tasksEventChannel.send(TasksEvent.NavigateToEditTaskScreen(task))
+        }
     }
 
     fun onTaskCheckedChanged(task: Task, isChecked: Boolean){
@@ -68,7 +70,15 @@ class TasksViewModel @ViewModelInject constructor(
         }
     }
 
+    fun onAddNewTaskClick() {
+        viewModelScope.launch {
+            tasksEventChannel.send(TasksEvent.NavigateToAddTaskScreen)
+        }
+    }
+
     sealed class TasksEvent{
+        object NavigateToAddTaskScreen : TasksEvent()
+        data class NavigateToEditTaskScreen(val task: Task) : TasksEvent()
         data class ShowUndoDeleteTaskMessage(val task: Task) : TasksEvent()
     }
 }

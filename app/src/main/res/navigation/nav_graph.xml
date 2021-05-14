@@ -8,5 +8,23 @@
         android:id="@+id/tasksFragment3"
         android:name="com.kadirkuruca.todolist.ui.tasks.TasksFragment"
         android:label="Task List"
-        tools:layout="@layout/fragment_tasks" />
+        tools:layout="@layout/fragment_tasks" >
+        <action
+            android:id="@+id/action_tasksFragment3_to_addEditTaskFragment2"
+            app:destination="@id/addEditTaskFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/addEditTaskFragment2"
+        android:name="com.kadirkuruca.todolist.ui.addedittask.AddEditTaskFragment"
+        android:label="{title}"
+        tools:layout="@layout/fragment_add_edit_task">
+        <argument
+            android:name="task"
+            android:defaultValue="@null"
+            app:argType="com.kadirkuruca.todolist.data.Task"
+            app:nullable="true" />
+        <argument
+            android:name="title"
+            app:argType="string" />
+    </fragment>
 </navigation>
