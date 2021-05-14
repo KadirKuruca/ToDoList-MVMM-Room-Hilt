@@ -7,6 +7,8 @@ import com.kadirkuruca.todolist.data.PreferencesManager
 import com.kadirkuruca.todolist.data.SortOrder
 import com.kadirkuruca.todolist.data.Task
 import com.kadirkuruca.todolist.data.TaskDao
+import com.kadirkuruca.todolist.ui.ADD_TASK_RESULT_OK
+import com.kadirkuruca.todolist.ui.EDIT_TASK_RESULT_OK
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -17,9 +19,9 @@ import kotlinx.coroutines.launch
 class TasksViewModel @ViewModelInject constructor(
     private val taskDao: TaskDao,
     private val preferencesManager: PreferencesManager,
-    @Assisted private val state : SavedStateHandle
+    @Assisted private val state: SavedStateHandle
 ) : ViewModel() {
-    val searchQuery = state.getLiveData("searchQuery","") //Search query gets from SavedStateHandle
+    val searchQuery = state.getLiveData("searchQuery", "") //Search query gets from SavedStateHandle
 
     val preferencesFlow = preferencesManager.preferencesFlow
 
@@ -51,7 +53,7 @@ class TasksViewModel @ViewModelInject constructor(
         }
     }
 
-    fun onTaskCheckedChanged(task: Task, isChecked: Boolean){
+    fun onTaskCheckedChanged(task: Task, isChecked: Boolean) {
         viewModelScope.launch {
             taskDao.update(task.copy(isCompleted = isChecked))
         }
@@ -76,9 +78,23 @@ class TasksViewModel @ViewModelInject constructor(
         }
     }
 
-    sealed class TasksEvent{
+    fun onAddEditResult(result: Int) {
+        when (result) {
+            ADD_TASK_RESULT_OK -> showTaskConfirmationMessage("Task added!")
+            EDIT_TASK_RESULT_OK -> showTaskConfirmationMessage("Task updated!")
+        }
+    }
+
+    private fun showTaskConfirmationMessage(msg: String) {
+        viewModelScope.launch {
+            tasksEventChannel.send(TasksEvent.ShowTaskConfirmationMessage(msg))
+        }
+    }
+
+    sealed class TasksEvent {
         object NavigateToAddTaskScreen : TasksEvent()
         data class NavigateToEditTaskScreen(val task: Task) : TasksEvent()
         data class ShowUndoDeleteTaskMessage(val task: Task) : TasksEvent()
+        data class ShowTaskConfirmationMessage(val msg: String) : TasksEvent()
     }
 }
