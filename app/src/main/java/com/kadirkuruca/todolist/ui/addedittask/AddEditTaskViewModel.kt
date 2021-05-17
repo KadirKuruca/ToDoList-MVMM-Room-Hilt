@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kadirkuruca.todolist.data.Task
 import com.kadirkuruca.todolist.data.TaskDao
+import com.kadirkuruca.todolist.repository.TaskRepository
 import com.kadirkuruca.todolist.ui.ADD_TASK_RESULT_OK
 import com.kadirkuruca.todolist.ui.EDIT_TASK_RESULT_OK
 import kotlinx.coroutines.channels.Channel
@@ -16,7 +17,7 @@ import java.util.concurrent.Flow
 
 class AddEditTaskViewModel @ViewModelInject constructor(
     @Assisted private val state: SavedStateHandle,
-    private val taskDao: TaskDao
+    private val taskRepository: TaskRepository
 ) : ViewModel() {
 
     val task = state.get<Task>("task") //Get task value from SavedStateHandle
@@ -45,7 +46,7 @@ class AddEditTaskViewModel @ViewModelInject constructor(
         if (task != null) {
             val updatedTask = task.copy(name = taskName, isImportant = taskImportance)
             viewModelScope.launch {
-                taskDao.update(updatedTask)
+                taskRepository.update(updatedTask)
                 //navigate back
                 addEditTaskEventChannel.send(AddEditTaskEvent.NavigateBackWithResult(
                     EDIT_TASK_RESULT_OK))
@@ -53,7 +54,7 @@ class AddEditTaskViewModel @ViewModelInject constructor(
         } else {
             val task = Task(name = taskName, isImportant = taskImportance)
             viewModelScope.launch {
-                taskDao.insert(task)
+                taskRepository.insert(task)
                 //navigate back
                 addEditTaskEventChannel.send(AddEditTaskEvent.NavigateBackWithResult(
                     ADD_TASK_RESULT_OK))

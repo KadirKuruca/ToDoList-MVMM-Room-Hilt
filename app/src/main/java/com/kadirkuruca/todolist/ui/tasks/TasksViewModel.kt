@@ -7,6 +7,7 @@ import com.kadirkuruca.todolist.data.PreferencesManager
 import com.kadirkuruca.todolist.data.SortOrder
 import com.kadirkuruca.todolist.data.Task
 import com.kadirkuruca.todolist.data.TaskDao
+import com.kadirkuruca.todolist.repository.TaskRepository
 import com.kadirkuruca.todolist.ui.ADD_TASK_RESULT_OK
 import com.kadirkuruca.todolist.ui.EDIT_TASK_RESULT_OK
 import kotlinx.coroutines.channels.Channel
@@ -17,7 +18,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class TasksViewModel @ViewModelInject constructor(
-    private val taskDao: TaskDao,
+    private val taskRepository: TaskRepository,
     private val preferencesManager: PreferencesManager,
     @Assisted private val state: SavedStateHandle
 ) : ViewModel() {
@@ -34,7 +35,7 @@ class TasksViewModel @ViewModelInject constructor(
     ) { searchQuery, filterPreferences ->
         Pair(searchQuery, filterPreferences)
     }.flatMapLatest { (searchQuery, filterPreferences) ->
-        taskDao.getTasks(searchQuery, filterPreferences.sortOrder, filterPreferences.hideCompleted)
+        taskRepository.getTasks(searchQuery, filterPreferences.sortOrder, filterPreferences.hideCompleted)
     }
 
     val tasks = tasksFlow.asLiveData()
@@ -55,20 +56,20 @@ class TasksViewModel @ViewModelInject constructor(
 
     fun onTaskCheckedChanged(task: Task, isChecked: Boolean) {
         viewModelScope.launch {
-            taskDao.update(task.copy(isCompleted = isChecked))
+            taskRepository.update(task.copy(isCompleted = isChecked))
         }
     }
 
     fun onTaskSwiped(task: Task) {
         viewModelScope.launch {
-            taskDao.delete(task)
+            taskRepository.delete(task)
             tasksEventChannel.send(TasksEvent.ShowUndoDeleteTaskMessage(task))
         }
     }
 
     fun onUndoDeleteClick(task: Task) {
         viewModelScope.launch {
-            taskDao.insert(task)
+            taskRepository.insert(task)
         }
     }
 
